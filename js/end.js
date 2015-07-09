@@ -1,5 +1,4 @@
-function End(){}
-End.prototype = {
+End = {
 	create: function(){
 		this.cursor = this.game.input.keyboard.createCursorKeys();
 		

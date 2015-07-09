@@ -1,5 +1,4 @@
-function Play(){}
-Play.prototype = {
+var Play = {
 	create: function(){
 		this.cursor = this.game.input.keyboard.createCursorKeys();
 
@@ -12,8 +11,12 @@ Play.prototype = {
     	this.respawnPoint = new Phaser.Point(0,0);
 
     	//sound
-		this.backgroundMusic = game.add.audio('backgroundMusic',.3,true);
-		this.checkpointSound = game.add.audio('checkpoint1',.5);
+    	this.sounds = {
+    		music: game.add.audio('backgroundMusic',.1,true),
+    		button: game.add.audio('button',.5),
+    		checkpoint: game.add.audio('checkpoint',.5),
+    		finish: game.add.audio('finish',.5)
+    	}
 
 		//wires
 		this.wires = game.add.group();
@@ -57,14 +60,29 @@ Play.prototype = {
 		this.mute.fixedToCamera = true;
 
 		//start
-		this.backgroundMusic.play();
+		this.sounds.music.play();
 		this.loadLevel(1);
 	},
 	update: function(){
 		this.game.physics.arcade.collide(this.layer, this.player);
 		this.game.physics.arcade.collide(this.doors, this.player);
-		this.game.physics.arcade.collide(this.checkpoints, this.player,undefined,function(player,checkpoint){
-			if(this.respawnPoint !== checkpoint.position){
+
+		if(this.player.alive){
+
+		game.physics.arcade.overlap(this.finish,this.player,function(){
+			if(this.cursor.down.justDown){
+				this.sounds.finish.play();
+				this.player.alive = false;
+
+				this.sounds.finish.onStop.addOnce(function(){
+					this.player.alive = true;
+					this.loadLevel(this.level+1);
+				},this)
+
+			}
+		},undefined,this);
+		this.game.physics.arcade.overlap(this.checkpoints, this.player,function(player,checkpoint){
+			if(this.respawnPoint !== checkpoint.position && this.cursor.down.justDown){
 				this.respawnPoint = checkpoint.position;
 
 				this.checkpoints.forEach(function(obj){
@@ -74,21 +92,21 @@ Play.prototype = {
 				checkpoint.frame = 1;
 				checkpoint.angle = 45;
 
-				this.checkpointSound.play();
+				this.sounds.checkpoint.play();
 			}
 
 			return false;
-		},this);
-		this.game.physics.arcade.collide(this.buttons, this.player,undefined,function(player,button){
+		},undefined,this);
+		game.physics.arcade.overlap(this.buttons, this.player,function(player, button){
 			if(this.cursor.down.justDown){
 				button.changeSate(!button.alive);
+				this.sounds.button.play();
 			}
 
 			return false;
-		},this);
-		game.physics.arcade.collide(this.finish,this.player,function(){
-			this.loadLevel(this.level+1);
-		},undefined,this);
+		},undefined,this)
+
+		}
 
 		this.movePlayer();
 
@@ -212,6 +230,12 @@ Play.prototype = {
 	playerDie: function(){
 		// this.player.alive = false;
 
+		this.buttons.forEach(function(btn){
+			if(btn.properties.resetOnDeath){
+				 btn.changeSate(true);
+			}
+		},this);
+
 		this.respawnPlayer();
 	},
 	respawnPlayer: function(){
@@ -220,6 +244,8 @@ Play.prototype = {
 	createWire: function(data){
 		var margin = 16;
 		var wire = game.make.graphics(data.width + margin*2, data.height + margin*2);
+		wire.id = data.properties.id;
+		wire.properties = data.properties;
 		wire.x = data.x - margin;
 		wire.y = data.y - margin;
 
@@ -246,7 +272,7 @@ Play.prototype = {
 
 		wire.changeSate = function(state){
 			this.alive = state;
-			this.rendre();
+			this.render();
 		}
 
 		wire.render();
@@ -255,27 +281,35 @@ Play.prototype = {
 	},
 	createDoor: function(data){
 		var margin = 16;
-		var door = game.make.graphics(data.width + margin*2, data.height + margin*2);
-		door.x = data.x - margin;
-		door.y = data.y - margin;
-		// game.physics.arcade.enable(door);
+		var door = game.make.sprite(data.x, data.y);
+		var graphics = game.make.graphics(data.width + margin*2, data.height + margin*2);
+		graphics.x = - margin;
+		graphics.y = - margin;
+		door.addChild(graphics);
+
+		door.id = data.properties.id;
+		door.properties = data.properties;
+		game.physics.arcade.enable(door,false);
+		door.body.immovable = true;
+		door.body.setSize(data.width,data.height);
 
 		door.render = function(){
-			this.clear();
+			graphics.clear();
 			if(this.alive){
-				this.lineStyle(2,colorsHEX[3], 1);
-				this.beginFill(colorsHEX[3],0.5);
-				this.drawRect(margin,margin,data.width, data.height);
-				this.endFill()
+				graphics.lineStyle(2,colorsHEX[3], 1);
+				graphics.beginFill(colorsHEX[3],0.5);
+				graphics.drawRect(margin,margin,data.width, data.height);
+				graphics.endFill()
 			}
 			else{
-				this.lineStyle(2,colorsHEX[2], 1);
-				this.drawRect(margin,margin,data.width, data.height);
+				graphics.lineStyle(2,colorsHEX[2], 1);
+				graphics.drawRect(margin,margin,data.width, data.height);
 			}
 		}
 
 		door.changeSate = function(state){
 			this.alive = state;
+			this.body.enable = state;
 			this.render();
 		}
 
@@ -285,12 +319,27 @@ Play.prototype = {
 	},
 	createButton: function(data){
 		var button = game.make.sprite(data.x,data.y,'button');
-		game.physics.arcade.enable(button);
+		button.id = data.properties.id;
+		button.properties = data.properties;
 		button.anchor.set(.5,.5);
+		game.physics.arcade.enable(button);
+		button.body.setSize(16,16,0,0);
 
 		button.changeSate = function(state){
 			this.alive = state;
 			this.frame = (this.alive)? 0 : 1;
+
+			Play.wires.forEach(function(wire){
+				if(wire.id == this.id){
+					wire.changeSate(state);
+				}
+			},this)
+
+			Play.doors.forEach(function(door){
+				if(door.id == this.id){
+					door.changeSate(state);
+				}
+			},this)
 		}
 
 		return button;

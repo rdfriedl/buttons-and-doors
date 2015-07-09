@@ -4,6 +4,10 @@ var font = {
 	'fill': colors[1]
 };
 
+function choose(){
+	return arguments[Math.round(Math.random() * (arguments.length-1))];
+}
+
 Boot = function () {
 	this.preload = function () {
     	game.physics.startSystem(Phaser.Physics.ARCADE);
@@ -11,16 +15,16 @@ Boot = function () {
 		game.stage.disableVisibilityChange = true;
 		game.stage.backgroundColor = colors[0];
 
-		game.load.image('loading', 'assets/loading.png');
-		game.load.image('loading2', 'assets/loading2.png');
+		game.load.image('loading', 'assets/img/loading.png');
+		game.load.image('loading2', 'assets/img/loading2.png');
 	}
 	this.create = function() {
 		game.state.start('Load');
 	}
 };
 
-function Load(){
-	this.preload = function(){
+var Load = {
+	preload: function(){
 	    var label2 = game.add.text(Math.floor(game.scale.width/2)+0.5, Math.floor(game.scale.height/2)-15+0.5, 'loading...', { font: '30px Arial', fill: '#fff' });
 		label2.anchor.setTo(0.5, 0.5);
 
@@ -30,22 +34,24 @@ function Load(){
 		preloading.x -= preloading.width/2;
 		game.load.setPreloadSprite(preloading);
 
-		game.load.spritesheet('player','assets/player.png',32,32);
-		game.load.image('key','assets/key.png');
-		game.load.spritesheet('sound','assets/sound.png',32,32);
-		game.load.spritesheet('checkpoint','assets/checkpoint.png',32,32);
-		game.load.spritesheet('button','assets/button.png',32,32);
-		game.load.image('tileset','assets/tileset.png');
+		game.load.spritesheet('player','assets/img/player.png',32,32);
+		game.load.image('key','assets/img/key.png');
+		game.load.spritesheet('sound','assets/img/sound.png',32,32);
+		game.load.spritesheet('checkpoint','assets/img/checkpoint.png',32,32);
+		game.load.spritesheet('button','assets/img/button.png',32,32);
+		game.load.image('tileset','assets/img/tileset.png');
 
 		//sounds
-		game.load.audio('backgroundMusic',['assets/espionage.mp3','assets/espionage.ogg']);
-		game.load.audio('checkpoint1','assets/checkpoint1.mp3');
+		game.load.audio('backgroundMusic',['assets/audio/espionage.mp3','assets/audio/espionage.ogg']);
+		game.load.audio('checkpoint','assets/audio/checkpoint.mp3');
+		game.load.audio('button','assets/audio/button.mp3');
+		game.load.audio('finish','assets/audio/finish.mp3');
 
 		//levels
 		game.load.tilemap('level1','assets/levels/1.json',null,Phaser.Tilemap.TILED_JSON);
 		game.load.tilemap('level2','assets/levels/2.json',null,Phaser.Tilemap.TILED_JSON);
 	},
-	this.create = function(){
+	create: function(){
 		game.state.start('Menu');
 	}
 }

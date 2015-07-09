@@ -1,5 +1,4 @@
-function Menu(){}
-Menu.prototype = {
+var Menu = {
 	create: function(){
 		this.cursor = this.game.input.keyboard.createCursorKeys();
 		
