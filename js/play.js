@@ -24,11 +24,14 @@ var Play = {
 		//buttons
 		this.buttons = game.add.group();
 
+		//labels
+		this.labels = game.add.group();
+
 		//doors
 		this.doors = game.add.group();
 
-		//labels
-		this.labels = game.add.group();
+		//blocks
+		this.blocks = game.add.group();
 
 		//checkpoints
 		this.checkpoints = game.add.group();
@@ -66,6 +69,11 @@ var Play = {
 	update: function(){
 		this.game.physics.arcade.collide(this.layer, this.player);
 		this.game.physics.arcade.collide(this.doors, this.player);
+		this.game.physics.arcade.collide(this.blocks, this.player);
+
+		this.game.physics.arcade.collide(this.layer, this.blocks);
+		this.game.physics.arcade.collide(this.doors, this.blocks);
+		this.game.physics.arcade.collide(this.blocks, this.blocks);
 
 		if(this.player.alive){
 
@@ -114,16 +122,11 @@ var Play = {
 			this.playerDie();
 	},
 	clearLevel: function(){
-		this.wires.callAll('destroy');
 		this.wires.removeAll();
-		this.buttons.callAll('destroy');
 		this.buttons.removeAll();
-		this.doors.callAll('destroy');
-		this.doors.removeAll();
-		this.labels.callAll('destroy');
 		this.labels.removeAll();
-		this.checkpoints.callAll('destroy');
 		this.checkpoints.removeAll();
+		this.blocks.removeAll();
 
 		if(this.map) this.map.destroy();
 		if(this.layer) this.layer.destroy();
@@ -170,8 +173,14 @@ var Play = {
 					break;
 				case 'wire':
 					this.wires.add(this.createWire(object));
+					break;
 				case 'door':
 					this.doors.add(this.createDoor(object));
+					break;
+				case 'block':
+					if(!object.width || !object.height) break;
+
+					this.createBlock(object);
 					break;
 				case 'finish':
 					this.finish.x = object.x;
@@ -193,7 +202,7 @@ var Play = {
 		if (this.cursor.left.isDown) {
 			this.player.frame = 0;
 
-			if (this.player.body.blocked.down)
+			if (this.player.body.blocked.down || this.player.body.touching.down)
 				this.player.body.velocity.x = -150;
 			else
 				this.player.body.velocity.x = -120;
@@ -201,7 +210,7 @@ var Play = {
 		else if (this.cursor.right.isDown) {
 			this.player.frame = 2;
 			
-			if (this.player.body.blocked.down)
+			if (this.player.body.blocked.down || this.player.body.touching.down)
 				this.player.body.velocity.x = 150;
 			else
 				this.player.body.velocity.x = 120;
@@ -209,13 +218,13 @@ var Play = {
 		else
 			this.player.frame = 1;
 
-		if (this.player.body.blocked.down)
+		if (this.player.body.blocked.down || this.player.body.touching.down)
 			this.player.body.gravity.y = 200;
 		else
 			this.player.body.gravity.y = 500;
 
 		//jump
-		if (this.cursor.up.isDown && this.player.body.blocked.down) {
+		if (this.cursor.up.isDown && (this.player.body.blocked.down || this.player.body.touching.down)) {
 			this.player.body.velocity.y = -100;
 			// if (sound) this.jump_s.play();
 			this.playerJumpCount = 1;
@@ -230,17 +239,36 @@ var Play = {
 	playerDie: function(){
 		// this.player.alive = false;
 
-		this.buttons.forEach(function(btn){
-			if(btn.properties.resetOnDeath){
-				 btn.changeSate(true);
-			}
-		},this);
+		this.fireMapEvent('onDeath');
 
 		this.respawnPlayer();
 	},
 	respawnPlayer: function(){
 		this.player.position.copyFrom(this.respawnPoint);
 	},
+	fireMapEvent: function(event){
+		this.buttons.forEach(function(obj){
+			if(obj.properties[event]){
+				 obj.mapEvent(obj.properties[event]);
+			}
+		},this);
+		this.checkpoints.forEach(function(obj){
+			if(obj.properties[event]){
+				 obj.mapEvent(obj.properties[event]);
+			}
+		},this);
+		this.doors.forEach(function(obj){
+			if(obj.properties[event]){
+				 obj.mapEvent(obj.properties[event]);
+			}
+		},this);
+		this.blocks.forEach(function(obj){
+			if(obj.properties[event]){
+				 obj.mapEvent(obj.properties[event]);
+			}
+		},this);
+	},
+
 	createWire: function(data){
 		var margin = 16;
 		var wire = game.make.graphics(data.width + margin*2, data.height + margin*2);
@@ -342,6 +370,42 @@ var Play = {
 			},this)
 		}
 
+		button.mapEvent = function(event){
+			switch(event){
+				case 'reset':
+					this.changeSate(true);
+					break;
+				case 'turnOff':
+					this.changeSate(false);
+					break;
+				case 'turnOn':
+					this.changeSate(true);
+					break;
+			}
+		}
+
 		return button;
+	},
+	createBlock: function(data){
+		var block = this.blocks.create(data.x,data.y,'block');
+		block.width = data.width;
+		block.height = data.height;
+
+		game.physics.arcade.enable(block);
+		block.body.immovable = true;
+		block.body.gravity.y = 500;
+
+		return block;
+	},
+
+	render: function(){
+		if(!debug) return;
+		
+		this.blocks.forEach(function(obj){
+			game.debug.body(obj);
+		})
+		this.doors.forEach(function(obj){
+			game.debug.body(obj);
+		})
 	}
 }

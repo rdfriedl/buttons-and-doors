@@ -130,7 +130,7 @@
                  "properties":
                     {
                      "id":"2",
-                     "resetOnDeath":"true"
+                     "onDeath":"reset"
                     },
                  "rotation":0,
                  "type":"button",
@@ -185,7 +185,7 @@
          "x":0,
          "y":0
         }],
- "nextobjectid":37,
+ "nextobjectid":38,
  "orientation":"orthogonal",
  "properties":
     {
@@ -196,7 +196,7 @@
  "tilesets":[
         {
          "firstgid":1,
-         "image":"..\/tileset.png",
+         "image":"..\/img\/tileset.png",
          "imageheight":48,
          "imagewidth":48,
          "margin":0,

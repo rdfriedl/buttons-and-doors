@@ -3,6 +3,7 @@ var colorsHEX = [0x247BA0,0xFFFFFF,0x5BC191,0xF25F5C,0xFFE066];
 var font = {
 	'fill': colors[1]
 };
+var debug = false;
 
 function choose(){
 	return arguments[Math.round(Math.random() * (arguments.length-1))];
@@ -35,11 +36,11 @@ var Load = {
 		game.load.setPreloadSprite(preloading);
 
 		game.load.spritesheet('player','assets/img/player.png',32,32);
-		game.load.image('key','assets/img/key.png');
 		game.load.spritesheet('sound','assets/img/sound.png',32,32);
 		game.load.spritesheet('checkpoint','assets/img/checkpoint.png',32,32);
 		game.load.spritesheet('button','assets/img/button.png',32,32);
 		game.load.image('tileset','assets/img/tileset.png');
+		game.load.image('block','assets/img/block.png');
 
 		//sounds
 		game.load.audio('backgroundMusic',['assets/audio/espionage.mp3','assets/audio/espionage.ogg']);
@@ -50,6 +51,9 @@ var Load = {
 		//levels
 		game.load.tilemap('level1','assets/levels/1.json',null,Phaser.Tilemap.TILED_JSON);
 		game.load.tilemap('level2','assets/levels/2.json',null,Phaser.Tilemap.TILED_JSON);
+		game.load.tilemap('level3','assets/levels/3.json',null,Phaser.Tilemap.TILED_JSON);
+		game.load.tilemap('level4','assets/levels/4.json',null,Phaser.Tilemap.TILED_JSON);
+		game.load.tilemap('level5','assets/levels/5.json',null,Phaser.Tilemap.TILED_JSON);
 	},
 	create: function(){
 		game.state.start('Menu');
