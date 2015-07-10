@@ -73,6 +73,39 @@ var Play = {
 		this.title.fontWeight = 'bold';
 		this.title.fontSize = 50;
 		this.title.anchor.set(.5,0);
+		this.subTitle = game.make.text(0,60,'Getting Started',Object.create(font));
+		this.subTitle.fontSize = 20;
+		this.subTitle.anchor.set(.5,0);
+		this.title.addChild(this.subTitle);
+
+		//controls
+		this.cursor.down.onDown.add(function(){
+			game.physics.arcade.overlap(this.finish,this.player,function(){
+				this.sounds.finish.play();
+				this.player.alive = false;
+
+				this.sounds.finish.onStop.addOnce(function(){
+					this.player.alive = true;
+					this.loadLevel(this.level+1);
+				},this)
+			},undefined,this);
+			this.game.physics.arcade.overlap(this.checkpoints, this.player,function(player,checkpoint){
+				this.respawnPoint = checkpoint.position;
+
+				this.checkpoints.forEach(function(obj){
+					obj.frame = 0;
+					obj.angle = 0;
+				});
+				checkpoint.frame = 1;
+				checkpoint.angle = 45;
+
+				this.sounds.checkpoint.play();
+			},undefined,this);
+			game.physics.arcade.overlap(this.buttons, this.player,function(player, button){
+				button.changeSate(!button.alive);
+				this.sounds.button.play();
+			},undefined,this)
+		},this);
 
 		//start
 		this.sounds.music.play();
@@ -87,57 +120,21 @@ var Play = {
 		this.game.physics.arcade.collide(this.doors, this.blocks);
 		this.game.physics.arcade.collide(this.blocks, this.blocks);
 
-		if(this.player.alive){
-
-		game.physics.arcade.overlap(this.finish,this.player,function(){
-			if(this.cursor.down.justDown){
-				this.sounds.finish.play();
-				this.player.alive = false;
-
-				this.sounds.finish.onStop.addOnce(function(){
-					this.player.alive = true;
-					this.loadLevel(this.level+1);
-				},this)
-
-			}
-		},undefined,this);
-		this.game.physics.arcade.overlap(this.checkpoints, this.player,function(player,checkpoint){
-			if(this.respawnPoint !== checkpoint.position && this.cursor.down.justDown){
-				this.respawnPoint = checkpoint.position;
-
-				this.checkpoints.forEach(function(obj){
-					obj.frame = 0;
-					obj.angle = 0;
-				});
-				checkpoint.frame = 1;
-				checkpoint.angle = 45;
-
-				this.sounds.checkpoint.play();
-			}
-
-			return false;
-		},undefined,this);
-		game.physics.arcade.overlap(this.buttons, this.player,function(player, button){
-			if(this.cursor.down.justDown){
-				button.changeSate(!button.alive);
-				this.sounds.button.play();
-			}
-
-			return false;
-		},undefined,this)
-
-		}
-
 		this.movePlayer();
 
 		if(this.player.y > game.world.height + 64)
 			this.playerDie();
 	},
 	clearLevel: function(){
+		this.wires.callAll('destroy');
 		this.wires.removeAll();
+		this.buttons.callAll('destroy');
 		this.buttons.removeAll();
+		this.labels.callAll('destroy');
 		this.labels.removeAll();
+		this.checkpoints.callAll('destroy');
 		this.checkpoints.removeAll();
+		this.blocks.callAll('destroy');
 		this.blocks.removeAll();
 
 		if(this.map) this.map.destroy();
@@ -155,11 +152,13 @@ var Play = {
 		this.map = game.add.tilemap('level'+id);
 		this.map.addTilesetImage('tileset', 'tileset');
 		this.map.setCollisionBetween(1,4);
-		this.map.setTileIndexCallback(1, this.playerDie, this);
+		this.map.setTileIndexCallback(1, function(sprite,tile){
+			if(sprite === this.player){
+				this.playerDie();
+			}
+			return true;
+		}, this);
 		this.layer = this.map.createLayer('layer');
-		// this.map.createFromObjects('objects', 2, 'coin', 0, true, false, this.coins);
-		// this.map.createFromObjects('objects', 4, 'enemy', 0, true, false, this.enemies);
-		// this.map.createFromObjects('objects', 5, 'enemy', 0, true, false, this.enemies);
 		for(var i in this.map.objects.objects){
 			var object = this.map.objects.objects[i];
 
@@ -203,6 +202,7 @@ var Play = {
 
 		this.title.alpha = 0;
 		this.title.text = 'Level: '+this.level;
+		this.subTitle.text = Play.map.properties.title || '';
 		this.titleFade = game.add.tween(this.title);
 		this.titleFade
 			.to({
@@ -266,6 +266,7 @@ var Play = {
 		this.respawnPlayer();
 	},
 	respawnPlayer: function(){
+		this.player.body.velocity.set(0,0);
 		this.player.position.copyFrom(this.respawnPoint);
 	},
 	fireMapEvent: function(event){
