@@ -136,6 +136,8 @@ var Play = {
 		this.checkpoints.removeAll();
 		this.blocks.callAll('destroy');
 		this.blocks.removeAll();
+		this.doors.callAll('destroy');
+		this.doors.removeAll();
 
 		if(this.map) this.map.destroy();
 		if(this.layer) this.layer.destroy();
