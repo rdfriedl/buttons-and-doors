@@ -41,6 +41,7 @@ var Load = {
 		game.load.spritesheet('button','assets/img/button.png',32,32);
 		game.load.image('tileset','assets/img/tileset.png');
 		game.load.image('block','assets/img/block.png');
+		game.load.image('title','assets/img/title.png');
 
 		//sounds
 		game.load.audio('backgroundMusic',['assets/audio/espionage.mp3','assets/audio/espionage.ogg']);
@@ -54,6 +55,11 @@ var Load = {
 		game.load.tilemap('level3','assets/levels/3.json',null,Phaser.Tilemap.TILED_JSON);
 		game.load.tilemap('level4','assets/levels/4.json',null,Phaser.Tilemap.TILED_JSON);
 		game.load.tilemap('level5','assets/levels/5.json',null,Phaser.Tilemap.TILED_JSON);
+		game.load.tilemap('level6','assets/levels/6.json',null,Phaser.Tilemap.TILED_JSON);
+		game.load.tilemap('level7','assets/levels/7.json',null,Phaser.Tilemap.TILED_JSON);
+		game.load.tilemap('level8','assets/levels/8.json',null,Phaser.Tilemap.TILED_JSON);
+		game.load.tilemap('level9','assets/levels/9.json',null,Phaser.Tilemap.TILED_JSON);
+		game.load.tilemap('level10','assets/levels/10.json',null,Phaser.Tilemap.TILED_JSON);
 	},
 	create: function(){
 		game.state.start('Menu');

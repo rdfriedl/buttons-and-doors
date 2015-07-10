@@ -1,4 +1,7 @@
 var Play = {
+	init: function(lvl){
+		this.level = lvl || 1;
+	},
 	create: function(){
 		this.cursor = this.game.input.keyboard.createCursorKeys();
 
@@ -49,10 +52,12 @@ var Play = {
 			game.sound.mute = !game.sound.mute;
 
 			if(game.sound.mute)
-				this.setFrames(2,0,2,0);
+				this.mute.setFrames(2,0,2,0);
 			else 
-				this.setFrames(3,1,3,1);
-		},undefined,3,1,3,1);
+				this.mute.setFrames(3,1,3,1);
+
+			this.sounds.button.play();
+		},this,3,1,3,1);
 
 		if(game.sound.mute)
 			this.mute.setFrames(2,0,2,0);
@@ -64,7 +69,7 @@ var Play = {
 
 		//start
 		this.sounds.music.play();
-		this.loadLevel(1);
+		this.loadLevel(this.level);
 	},
 	update: function(){
 		this.game.physics.arcade.collide(this.layer, this.player);
@@ -156,10 +161,7 @@ var Play = {
 					this.respawnPoint = new Phaser.Point(object.x,object.y);
 					break;
 				case 'checkpoint':
-					var obj = game.make.sprite(object.x,object.y,'checkpoint');
-					game.physics.arcade.enable(obj);
-					obj.anchor.set(.5,.5);
-					this.checkpoints.add(obj);
+					this.createCheckpoint(object);
 					break;
 				case 'label':
 					var obj = game.make.text(object.x + ((object.width)? object.width/2 : 0),object.y + ((object.height)? object.height/2 : 0),object.properties.text,Object.create(font,{
@@ -191,6 +193,9 @@ var Play = {
 		this.layer.resizeWorld();
 
 		this.respawnPlayer();
+
+		//save level
+		localStorage.lvl = this.level;
 	},
 	movePlayer: function(){
 		this.player.body.velocity.x = 0;
@@ -272,7 +277,6 @@ var Play = {
 	createWire: function(data){
 		var margin = 16;
 		var wire = game.make.graphics(data.width + margin*2, data.height + margin*2);
-		wire.id = data.properties.id;
 		wire.properties = data.properties;
 		wire.x = data.x - margin;
 		wire.y = data.y - margin;
@@ -315,10 +319,9 @@ var Play = {
 		graphics.y = - margin;
 		door.addChild(graphics);
 
-		door.id = data.properties.id;
 		door.properties = data.properties;
 		game.physics.arcade.enable(door,false);
-		door.body.immovable = true;
+		door.body.immovableTo = [this.player.body,this.blocks];
 		door.body.setSize(data.width,data.height);
 
 		door.render = function(){
@@ -347,27 +350,36 @@ var Play = {
 	},
 	createButton: function(data){
 		var button = game.make.sprite(data.x,data.y,'button');
-		button.id = data.properties.id;
 		button.properties = data.properties;
 		button.anchor.set(.5,.5);
 		game.physics.arcade.enable(button);
 		button.body.setSize(16,16,0,0);
 
-		button.changeSate = function(state){
+		button.changeSate = function(state,dontChange){
+			if(this.properties.id == undefined) return;
+
 			this.alive = state;
 			this.frame = (this.alive)? 0 : 1;
 
-			Play.wires.forEach(function(wire){
-				if(wire.id == this.id){
-					wire.changeSate(state);
-				}
-			},this)
+			if(!dontChange){
+				Play.wires.forEach(function(obj){
+					if(obj.properties.id == this.properties.id){
+						obj.changeSate(state);
+					}
+				},this)
 
-			Play.doors.forEach(function(door){
-				if(door.id == this.id){
-					door.changeSate(state);
-				}
-			},this)
+				Play.doors.forEach(function(obj){
+					if(obj.properties.id == this.properties.id){
+						obj.changeSate(state);
+					}
+				},this)
+
+				Play.buttons.forEach(function(obj){
+					if(obj.properties.id == this.properties.id && obj !== this){
+						obj.changeSate(state,true);
+					}
+				},this)
+			}
 		}
 
 		button.mapEvent = function(event){
@@ -390,12 +402,32 @@ var Play = {
 		var block = this.blocks.create(data.x,data.y,'block');
 		block.width = data.width;
 		block.height = data.height;
+		block.properties = data.properties;
 
 		game.physics.arcade.enable(block);
-		block.body.immovable = true;
+		block.body.immovableTo = [this.player.body];
 		block.body.gravity.y = 500;
 
+		block.startPosition = block.position.clone();
+
+		block.mapEvent = function(event){
+			switch(event){
+				case 'reset':
+					this.body.position.copyFrom(this.startPosition);
+					break;
+			}
+		}
+
 		return block;
+	},
+	createCheckpoint: function(data){
+		var checkpoint = this.checkpoints.create(data.x,data.y,'checkpoint');
+		checkpoint.properties = data.properties;
+		checkpoint.anchor.set(.5,.5);
+
+		game.physics.arcade.enable(checkpoint);
+
+		return checkpoint;
 	},
 
 	render: function(){

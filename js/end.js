@@ -1,4 +1,8 @@
 End = {
+	init: function(){
+		//clear the saved game
+		delete localStorage.lvl;
+	},
 	create: function(){
 		this.cursor = this.game.input.keyboard.createCursorKeys();
 		
