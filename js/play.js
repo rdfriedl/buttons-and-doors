@@ -67,6 +67,13 @@ var Play = {
 		this.mute.anchor.set(1,0);
 		this.mute.fixedToCamera = true;
 
+		//level title
+		this.title = game.add.text(game.scale.width/2,10,'',Object.create(font));
+		this.title.fixedToCamera = true;
+		this.title.fontWeight = 'bold';
+		this.title.fontSize = 50;
+		this.title.anchor.set(.5,0);
+
 		//start
 		this.sounds.music.play();
 		this.loadLevel(this.level);
@@ -193,6 +200,16 @@ var Play = {
 		this.layer.resizeWorld();
 
 		this.respawnPlayer();
+
+		this.title.alpha = 0;
+		this.title.text = 'Level: '+this.level;
+		this.titleFade = game.add.tween(this.title);
+		this.titleFade
+			.to({
+				alpha: 1
+			},2000)
+			.yoyo(true,2000)
+			.start();
 
 		//save level
 		localStorage.lvl = this.level;
