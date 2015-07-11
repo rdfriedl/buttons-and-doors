@@ -213,6 +213,10 @@ var Play = {
 			.yoyo(true,2000)
 			.start();
 
+		game.world.bringToTop(this.title);
+		game.world.bringToTop(this.subTitle);
+		game.world.bringToTop(this.mute);
+
 		//save level
 		localStorage.lvl = this.level;
 	},
