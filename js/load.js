@@ -39,6 +39,7 @@ var Load = {
 		game.load.spritesheet('sound','assets/img/sound.png',32,32);
 		game.load.spritesheet('checkpoint','assets/img/checkpoint.png',32,32);
 		game.load.spritesheet('button','assets/img/button.png',32,32);
+		game.load.spritesheet('menuButton','assets/img/menuButton.png',32,32);
 		game.load.image('tileset','assets/img/tileset.png');
 		game.load.image('block','assets/img/block.png');
 		game.load.image('title','assets/img/title.png');

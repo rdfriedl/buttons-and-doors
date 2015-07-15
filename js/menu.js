@@ -1,41 +1,36 @@
 var Menu = {
 	create: function(){
-		this.cursor = this.game.input.keyboard.createCursorKeys();
-		this.cursor.up.onDown.add(function(){
-			this.selectedIndex = 0;
-		},this);
-		this.cursor.down.onDown.add(function(){
-			if(this.loadButton.visible){
-				this.selectedIndex = 1;
-			}
-		},this);
-
-		game.input.keyboard.addKey(Phaser.Keyboard.ENTER).onDown.addOnce(function(){
-			this.play.fill = colors[4];
-			this.buttonSound.onStop.addOnce(function(){
-				switch(this.selectedIndex){
-					case 0:
-						game.state.start('Play');
-						break;
-					case 1:
-						game.state.start('Play',true,false,parseInt(localStorage.lvl));
-						break;
-				}
-			},this)
-			this.buttonSound.play();
-		},this);
-
 		this.title = game.add.image(game.scale.width/2,game.scale.height/4,'title');
 		this.title.anchor.set(.5,.5);
 		
 		this.play = game.add.text(game.scale.width/2,game.scale.height - (game.scale.height/3.5),'Play Game',Object.create(font));
 		this.play.anchor.set(.5,.5);
-		
-		this.loadButton = game.add.text(game.scale.width/2,game.scale.height - (game.scale.height/5.5),'Load Game',Object.create(font));
-		this.loadButton.anchor.set(.5,.5);
-		this.loadButton.visible = !!localStorage.lvl;
 
-		this.selectedIndex = 0;
+		this.playButton = game.add.button(game.scale.width/2,game.scale.height - (game.scale.height/3.5),'menuButton',function(){
+			this.buttonSound.onStop.addOnce(function(){
+				game.state.start('Play');
+			})
+			this.buttonSound.play();
+		},this,2,0,2,2);
+		this.playButton.anchor.set(.5,.5);
+		this.playButton.width = this.play.width + 32;
+		this.playButton.height = this.play.height + 16;
+		// this.playButton.addChild(this.play);
+		
+		this.load = game.add.text(game.scale.width/2,game.scale.height - (game.scale.height/6),'Load Game',Object.create(font));
+		this.load.anchor.set(.5,.5);
+		this.load.visible = !!localStorage.lvl;
+
+		this.loadButton = game.add.button(game.scale.width/2,game.scale.height - (game.scale.height/6),'menuButton',function(){
+			this.buttonSound.onStop.addOnce(function(){
+				game.state.start('Play',true,false,parseInt(localStorage.lvl));
+			})
+			this.buttonSound.play();
+		},this,2,0,2,2);
+		this.loadButton.anchor.set(.5,.5);
+		this.loadButton.width = this.load.width + 32;
+		this.loadButton.height = this.load.height + 16;
+		// this.loadButton.addChild(this.load);
 
 		this.mute = game.add.button(game.scale.width-10,10,'sound',function(){
 			game.sound.mute = !game.sound.mute;
@@ -52,15 +47,5 @@ var Menu = {
 		this.mute.fixedToCamera = true;
 
 		this.buttonSound = game.add.audio('button',.5);
-	},
-	update: function(){
-		if(this.selectedIndex == 0){
-			this.loadButton.fill = colors[1];
-			this.play.fill = colors[4];
-		}
-		else if(this.selectedIndex == 1){
-			this.play.fill = colors[1];
-			this.loadButton.fill = colors[4];
-		}
 	}
 }

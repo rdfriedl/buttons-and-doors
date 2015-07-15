@@ -420,6 +420,15 @@ var Play = {
 			}
 		}
 
+		switch(data.properties.state){
+			case 'on':
+				this.changeSate(true,true);
+				break;
+			case 'off':
+				this.changeSate(false,true);
+				break;
+		}
+
 		return button;
 	},
 	createBlock: function(data){
