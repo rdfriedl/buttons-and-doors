@@ -9,13 +9,16 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="32"
-   height="32"
-   viewBox="0 0 32 32.000001"
+   width="8"
+   height="8"
+   viewBox="0 0 8 8"
    id="svg2"
    version="1.1"
    inkscape:version="0.91 r13725"
-   sodipodi:docname="block.svg">
+   sodipodi:docname="playerDie.svg"
+   inkscape:export-filename="G:\wamp\www\buttons-and-doors\assets\img\playerDie.png"
+   inkscape:export-xdpi="90"
+   inkscape:export-ydpi="90">
   <defs
      id="defs4" />
   <sodipodi:namedview
@@ -23,27 +26,24 @@
      pagecolor="#ffffff"
      bordercolor="#666666"
      borderopacity="1.0"
-     inkscape:pageopacity="0"
+     inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="11.2"
-     inkscape:cx="4.2825383"
-     inkscape:cy="11.069515"
+     inkscape:zoom="22.4"
+     inkscape:cx="3.2917937"
+     inkscape:cy="5.5730599"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
-     showgrid="true"
+     showgrid="false"
      units="px"
-     inkscape:snap-bbox="true"
-     inkscape:bbox-nodes="true"
      inkscape:showpageshadow="false"
+     inkscape:snap-page="true"
      inkscape:window-width="1920"
      inkscape:window-height="1027"
      inkscape:window-x="-8"
      inkscape:window-y="-8"
-     inkscape:window-maximized="1">
-    <inkscape:grid
-       type="xygrid"
-       id="grid4136" />
-  </sodipodi:namedview>
+     inkscape:window-maximized="1"
+     inkscape:snap-bbox="true"
+     inkscape:bbox-nodes="true" />
   <metadata
      id="metadata7">
     <rdf:RDF>
@@ -60,13 +60,14 @@
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1"
-     transform="translate(0,-1020.3622)">
+     transform="translate(0,-1044.3622)">
     <rect
-       style="opacity:1;fill:#c8c8c8;fill-opacity:1;stroke:none;stroke-width:0.27000001;stroke-miterlimit:4;stroke-dasharray:none"
-       id="rect4138"
-       width="32"
-       height="32"
+       style="opacity:1;fill:#ffe066;fill-opacity:1;stroke:none;stroke-width:0.27000001;stroke-miterlimit:4;stroke-dasharray:none"
+       id="rect4136"
+       width="7.9999657"
+       height="7.9999657"
        x="0"
-       y="1020.3622" />
+       y="1044.3622"
+       ry="4.1078121e-015" />
   </g>
 </svg>
