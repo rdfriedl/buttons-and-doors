@@ -1,8 +1,13 @@
 var colors = ['#247BA0','#FFFFFF','#5BC191','#F25F5C','#FFE066']; //http://coolors.co/app/247ba0-ffffff-5bc191-f25f5c-ffe066
 var colorsHEX = [0x247BA0,0xFFFFFF,0x5BC191,0xF25F5C,0xFFE066];
 var font = {
-	'fill': colors[1]
+	'fill': colors[1],
+	'fontSize': 32
 };
+var inGameFont = {
+	'fill': colors[1],
+	'fontSize': 16
+}
 var debug = false;
 
 function choose(){
@@ -61,7 +66,7 @@ function parseDirection(val){
 			}
 			break;
 	}
-	
+
 	return 90; //return down
 }
 

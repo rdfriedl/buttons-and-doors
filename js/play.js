@@ -4,6 +4,12 @@ var Play = {
 	},
 	create: function(){
 		this.cursor = this.game.input.keyboard.createCursorKeys();
+		this.cursorAlt = {
+			up: this.game.input.keyboard.addKey(Phaser.Keyboard.W),
+			down: this.game.input.keyboard.addKey(Phaser.Keyboard.S),
+			right: this.game.input.keyboard.addKey(Phaser.Keyboard.D),
+			left: this.game.input.keyboard.addKey(Phaser.Keyboard.A)
+		}
 
     	//finish
     	this.finish = this.game.add.sprite(0,0,'checkpoint',1);
@@ -15,7 +21,7 @@ var Play = {
 
     	//sound
     	this.sounds = {
-    		music: game.add.audio('backgroundMusic',.1,true),
+    		music: game.add.audio('backgroundMusic',.2,true),
     		button: game.add.audio('button',.5),
     		checkpoint: game.add.audio('checkpoint',.5),
     		finish: game.add.audio('finish',.5)
@@ -49,6 +55,10 @@ var Play = {
 		this.playerDieEmitter.particleDrag.set(20,20)
     	this.playerDieEmitter.gravity = 150;
    	 	this.playerDieEmitter.angularDrag = 100;
+   	 	// for (var i = 0; i < this.playerDieEmitter.children.length; i++) {
+   	 	// 	var particle = this.playerDieEmitter.children[i];
+   	 	// 	particle.body.allowRotation = false;
+   	 	// }
 
 		game.camera.follow(this.player, Phaser.Camera.FOLLOW_PLATFORMER);
     	this.player.anchor.setTo(0.5, 0.5);
@@ -59,7 +69,7 @@ var Play = {
 
 			if(game.sound.mute)
 				this.mute.setFrames(2,0,2,0);
-			else 
+			else
 				this.mute.setFrames(3,1,3,1);
 
 			this.sounds.button.play();
@@ -67,7 +77,7 @@ var Play = {
 
 		if(game.sound.mute)
 			this.mute.setFrames(2,0,2,0);
-		else 
+		else
 			this.mute.setFrames(3,1,3,1);
 
 		this.mute.anchor.set(1,0);
@@ -85,8 +95,9 @@ var Play = {
 		this.title.addChild(this.subTitle);
 
 		//controls
-		this.cursor.down.onDown.add(function(){
-			game.physics.arcade.overlap(this.finish,this.player,function(){
+		function playerAction(){
+			// check for finish point
+			game.physics.arcade.overlap(this.finish, this.player, function(){
 				this.sounds.finish.play();
 				this.player.alive = false;
 
@@ -95,7 +106,9 @@ var Play = {
 					this.loadLevel(this.level+1);
 				},this)
 			},undefined,this);
-			this.game.physics.arcade.overlap(this.checkpoints, this.player,function(player,checkpoint){
+
+			// check for checkpoints
+			this.game.physics.arcade.overlap(this.checkpoints, this.player, function(player, checkpoint){
 				this.respawnPoint = checkpoint.position;
 
 				this.checkpoints.forEach(function(obj){
@@ -107,11 +120,15 @@ var Play = {
 
 				this.sounds.checkpoint.play();
 			},undefined,this);
-			game.physics.arcade.overlap(this.buttons, this.player,function(player, button){
+
+			// look for buttons
+			game.physics.arcade.overlap(this.buttons, this.player, function(player, button){
 				button.setState(!button.alive);
 				this.sounds.button.play();
 			},undefined,this)
-		},this);
+		}
+		this.cursor.down.onDown.add(playerAction, this);
+		this.cursorAlt.down.onDown.add(playerAction, this);
 
 		//start
 		this.sounds.music.play();
@@ -183,7 +200,7 @@ var Play = {
 					this.createCheckpoint(object);
 					break;
 				case 'label':
-					var obj = game.make.text(object.x + ((object.width)? object.width/2 : 0),object.y + ((object.height)? object.height/2 : 0),object.properties.text,Object.create(font,{
+					var obj = game.make.text(object.x + ((object.width)? object.width/2 : 0),object.y + ((object.height)? object.height/2 : 0),object.properties.text,Object.create(inGameFont,{
 						font: {value: 'bold 10pt Arial'}
 					}));
 					obj.anchor.set(.5,.5);
@@ -238,7 +255,7 @@ var Play = {
 			return;
 
 		//right/left
-		if (this.cursor.left.isDown) {
+		if (this.cursor.left.isDown || this.cursorAlt.left.isDown) {
 			this.player.frame = 0;
 
 			if (this.player.body.blocked.down || this.player.body.touching.down)
@@ -246,9 +263,9 @@ var Play = {
 			else
 				this.player.body.velocity.x = -120;
 		}
-		else if (this.cursor.right.isDown) {
+		else if (this.cursor.right.isDown || this.cursorAlt.right.isDown) {
 			this.player.frame = 2;
-			
+
 			if (this.player.body.blocked.down || this.player.body.touching.down)
 				this.player.body.velocity.x = 150;
 			else
@@ -263,16 +280,16 @@ var Play = {
 			this.player.body.gravity.y = 500;
 
 		//jump
-		if (this.cursor.up.isDown && (this.player.body.blocked.down || this.player.body.touching.down)) {
+		if ((this.cursor.up.isDown || this.cursorAlt.up.isDown) && (this.player.body.blocked.down || this.player.body.touching.down)) {
 			this.player.body.velocity.y = -100;
 			// if (sound) this.jump_s.play();
 			this.playerJumpCount = 1;
 		}
-        else if (this.cursor.up.isDown && this.playerJumpCount < 12 && this.playerJumpCount != 0) { 
+        else if ((this.cursor.up.isDown || this.cursorAlt.up.isDown) && this.playerJumpCount < 12 && this.playerJumpCount != 0) {
             this.playerJumpCount += 1;
             this.player.body.velocity.y = -220;
         }
-        else 
+        else
             this.playerJumpCount = 0;
 	},
 	playerDie: function(){
@@ -472,6 +489,7 @@ var Play = {
 		graphics.x = 0;
 		graphics.y = 0;
 		block.addChild(graphics);
+		block.mapData = data;
 		block.properties = data.properties;
 
 		game.physics.arcade.enable(block,false);
@@ -484,23 +502,13 @@ var Play = {
 				graphics.lineStyle(lineWidth, 0x000000, 1);
 				graphics.beginFill(colorsHEX[3], 1);
 				graphics.drawRect(lineWidth/2,lineWidth/2,data.width-lineWidth, data.height-lineWidth);
-				graphics.endFill()
-				// x
-			    // graphics.moveTo(lineWidth/2,lineWidth/2);
-			    // graphics.lineTo(data.width-lineWidth, data.height-lineWidth);	
-			    // graphics.moveTo(data.width-lineWidth,lineWidth/2);
-			    // graphics.lineTo(lineWidth/2, data.height-lineWidth);
+				graphics.endFill();
 			}
 			else{
 				graphics.lineStyle(lineWidth, 0x000000, 1);
 				graphics.beginFill(colorsHEX[2], 1);
 				graphics.drawRect(lineWidth/2,lineWidth/2,data.width-lineWidth, data.height-lineWidth);
-				graphics.endFill()
-				// x
-			    // graphics.moveTo(lineWidth/2,lineWidth/2);
-			    // graphics.lineTo(data.width-lineWidth, data.height-lineWidth);	
-			    // graphics.moveTo(data.width-lineWidth,lineWidth/2);
-			    // graphics.lineTo(lineWidth/2, data.height-lineWidth);	
+				graphics.endFill();
 			}
 		}
 
@@ -570,7 +578,7 @@ var Play = {
 
 	render: function(){
 		if(!debug) return;
-		
+
 		this.blocks.forEach(function(obj){
 			game.debug.body(obj);
 		})
